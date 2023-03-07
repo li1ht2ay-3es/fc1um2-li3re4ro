@@ -1,0 +1,64 @@
+description: build libretro
+
+
+inputs:
+  token:
+    description: github token
+    required: false
+    default: ''
+
+  arch:
+    description: system platform
+    required: false
+    default: x64
+
+
+runs:
+  using: composite
+
+  steps:
+    - uses: li1ht2ay-3es/gi1-ac2io3s@checkout-repo
+      with:
+        token: ${{ inputs.token }}
+        branch: upstream
+        auto: true
+
+
+    - uses: li1ht2ay-3es/gi1-ac2io3s@mingw-install
+      with:
+        arch: ${{ inputs.arch }}
+
+
+    - uses: hendrikmuhs/ccache-action@main
+      with:
+        key: ${{ inputs.arch }}
+
+
+    - shell: bash
+      run: |
+        merge () {
+          echo "<<< ===  merging  $1  === >>>"
+          git merge origin/$1
+          echo ""
+        }
+
+        merge audio-rate
+        merge mingw-flags
+        merge overscan-crop
+
+        merge color-depth      # requires overscan first
+
+        # merge libretro-options
+        # merge osd-message
+        # merge volume-level
+
+
+    - shell: bash
+      run: |
+        make platform="win" CC="ccache $MINGW_CC" CXX="ccache $MINGW_CXX"
+
+
+    - uses: actions/upload-artifact@main
+      with:
+        name: fceumm_libretro_${{ inputs.arch }}
+        path: ${{ github.workspace }}/**.dll
