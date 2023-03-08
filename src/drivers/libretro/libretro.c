@@ -2859,7 +2859,9 @@ void retro_run(void)
    retro_run_blit(gfx);
 
    stereo_filter_apply(sound, ssize);
-   audio_batch_cb((const int16_t*)sound, ssize);
+   for(uint32_t total = 0; total < ssize; ) {
+      total += (uint32_t)audio_batch_cb((const int16_t*)sound + total*2, ssize - total);
+   }
 }
 
 size_t retro_serialize_size(void)
@@ -3442,7 +3444,7 @@ bool retro_load_game(const struct retro_game_info *info)
 #ifdef GEKKO
    sndsamplerate = 32000;
 #else
-   sndsamplerate = 48000;
+   sndsamplerate = 96000;
 #endif
    sndquality = 0;
    sndvolume = 150;
