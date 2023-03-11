@@ -41,11 +41,11 @@ runs:
           git merge origin/$1
           echo ""
 
-          if ($LASTEXITCODE -Ne 0) {
+          if [[ $? != 0 ]]; then
             git diff --diff-filter=U
 
             exit $LASTEXITCODE
-          }
+          fi
         }
 
         merge audio-rate
