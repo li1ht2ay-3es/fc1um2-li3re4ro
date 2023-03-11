@@ -47,7 +47,6 @@ runs:
         merge overscan-crop
 
         merge color-depth      # requires overscan first
-        cat src/drivers/libretro/libretro.c
 
         # merge libretro-options
         # merge osd-message
