@@ -37,9 +37,9 @@ runs:
     - shell: bash
       run: |
         merge () {
-          echo "<<< ===  merging  $1  === >>>"
-          git merge origin/$1 || { git diff --diff-filter=U }
-          echo ""
+          echo "<<< ===  merging  $1  === >>>";
+          git merge origin/$1 || git diff --diff-filter=U;
+          echo "";
         }
 
         merge audio-rate
