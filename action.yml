@@ -38,15 +38,20 @@ runs:
       run: |
         merge () {
           echo "<<< ===  merging  $1  === >>>";
-          git merge origin/$1 || git diff --diff-filter=U;
+          if [ -z "$2" ]; then
+            git merge origin/$1 || { git diff --diff-filter=U; exit 1 };
+          else
+            git merge -X $2 origin/$1 || { git diff --diff-filter=U; exit 1 };
+          fi
           echo "";
         }
+
 
         merge audio-rate
         merge mingw-flags
         merge overscan-crop
 
-        merge color-depth      # requires overscan first
+        merge color-depth theirs     # requires overscan first
 
         # merge libretro-options
         # merge osd-message
