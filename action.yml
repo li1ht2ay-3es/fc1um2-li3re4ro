@@ -39,13 +39,14 @@ runs:
         merge () {
           echo "<<< ===  merging  $1  === >>>"
           git merge origin/$1
-          echo ""
 
           if [[ $? != 0 ]]; then
             git diff --diff-filter=U
 
             exit $LASTEXITCODE
           fi
+
+          echo ""
         }
 
         merge audio-rate
