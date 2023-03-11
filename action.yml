@@ -38,14 +38,7 @@ runs:
       run: |
         merge () {
           echo "<<< ===  merging  $1  === >>>"
-          git merge origin/$1
-
-          if [[ $? != 0 ]]; then
-            git diff --diff-filter=U
-
-            exit $LASTEXITCODE
-          fi
-
+          git merge origin/$1 || { git diff --diff-filter=U && exit 1 }
           echo ""
         }
 
