@@ -48,19 +48,22 @@ runs:
 
 
         merge audio-rate
+        merge color-depth
         merge mingw-flags
-        merge overscan-crop
-
-        merge color-depth theirs     # requires overscan first
 
         # merge libretro-options
         # merge osd-message
         # merge volume-level
 
 
+
     - shell: bash
+      env:
+        CC: ccache ${{ env.MINGW_CC }}
+        CXX: ccache ${{ env.MINGW_CXX }}
       run: |
-        make platform="win" CC="ccache $MINGW_CC" CXX="ccache $MINGW_CXX"
+        make platform="win"
+
 
 
     - uses: actions/upload-artifact@main
