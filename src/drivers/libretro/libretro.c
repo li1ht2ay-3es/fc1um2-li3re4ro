@@ -2348,11 +2348,7 @@ void get_mouse_input(unsigned port, uint32 variant, uint32_t *mousedata)
       if (mouse_Rbutton)
          mousedata[2] |= 0x2;
    }
-<<<<<<< HEAD
    else if (variant != RETRO_DEVICE_ARKANOID && zappermode == RetroPointer) {
-=======
-   else if (zappermode == RetroPointer) {
->>>>>>> 56b5f47 (Update Makefile.libretro)
       int offset_x = (crop_overscan_h_left * 0x120) - 1;
       int offset_y = (crop_overscan_v_top * 0x133) + 1;
 
@@ -2827,11 +2823,7 @@ static void retro_run_blit(uint8_t *gfx)
       incr   += (crop_overscan_h_left + crop_overscan_h_right);
       width  -= (crop_overscan_h_left + crop_overscan_h_right);
       height -= (crop_overscan_v_top + crop_overscan_v_bottom);
-<<<<<<< HEAD
-      pitch  -= (crop_overscan_h_left + crop_overscan_h_right) * sizeof(uint16_t);
-=======
       pitch  -= (crop_overscan_h_left + crop_overscan_h_right) * sizeof(uint32_t);
->>>>>>> 56b5f47 (Update Makefile.libretro)
       gfx    += (crop_overscan_v_top * 256) + crop_overscan_h_left;
 
       if (use_raw_palette)
