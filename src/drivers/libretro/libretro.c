@@ -2242,7 +2242,7 @@ static void check_variables(bool startup)
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
-      int val = (int)(atof(var.value) * 25.6);
+      int val = (int)(atof(var.value) * 1.0);
       sndvolume = val;
       FCEUD_SoundToggle();
    }
