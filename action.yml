@@ -50,10 +50,10 @@ runs:
         merge audio-rate
         merge color-depth
         merge mingw-flags
+        merge volume-level
 
         # merge libretro-options
         # merge osd-message
-        # merge volume-level
 
 
 
