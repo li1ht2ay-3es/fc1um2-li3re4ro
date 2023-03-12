@@ -502,7 +502,7 @@ struct retro_core_option_v2_definition option_defs[] = {
          { "200", "200%" }, \
          { NULL, NULL },
       },
-      "75",
+      "150",
    },
    {
       "fceumm_apu_1",
