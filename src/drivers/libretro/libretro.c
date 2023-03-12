@@ -195,12 +195,12 @@ static bool opt_showAdvSystemOptions = true;
 #if defined(PSP) || defined(PS2)
 static __attribute__((aligned(16))) uint16_t retro_palette[256];
 #else
-static uint16_t retro_palette[256];
+static uint32_t retro_palette[256];
 #endif
 #if defined(RENDER_GSKIT_PS2)
 static uint8_t* fceu_video_out;
 #else
-static uint16_t* fceu_video_out;
+static uint32_t* fceu_video_out;
 #endif
 
 /* Some timing-related variables. */
@@ -282,8 +282,8 @@ void FCEUD_SetPalette(uint8_t index, uint8_t r, uint8_t g, uint8_t b)
    }
 #endif
 
-#ifdef FRONTEND_SUPPORTS_RGB565
-   retro_palette[index_to_write] = BUILD_PIXEL_RGB565(r >> RED_EXPAND, g >> GREEN_EXPAND, b >> BLUE_EXPAND);
+#ifdef FRONTEND_SUPPORTS_RGB888
+   retro_palette[index_to_write] = (r << 16) | (g << 8) | (b << 0);
 #else
    retro_palette[index_to_write] =
       ((r >> RED_EXPAND) << RED_SHIFT) | ((g >> GREEN_EXPAND) << GREEN_SHIFT) | ((b >> BLUE_EXPAND) << BLUE_SHIFT);
@@ -2348,7 +2348,11 @@ void get_mouse_input(unsigned port, uint32 variant, uint32_t *mousedata)
       if (mouse_Rbutton)
          mousedata[2] |= 0x2;
    }
+<<<<<<< HEAD
    else if (variant != RETRO_DEVICE_ARKANOID && zappermode == RetroPointer) {
+=======
+   else if (zappermode == RetroPointer) {
+>>>>>>> 56b5f47 (Update Makefile.libretro)
       int offset_x = (crop_overscan_h_left * 0x120) - 1;
       int offset_y = (crop_overscan_v_top * 0x133) + 1;
 
@@ -2720,7 +2724,7 @@ static void retro_run_blit(uint8_t *gfx)
    unsigned incr   = 0;
    unsigned width  = 256;
    unsigned height = 240;
-   unsigned pitch  = 512;
+   unsigned pitch  = width * sizeof(uint32_t);
 
 #ifdef PSP
    if (crop_overscan)
@@ -2823,7 +2827,11 @@ static void retro_run_blit(uint8_t *gfx)
       incr   += (crop_overscan_h_left + crop_overscan_h_right);
       width  -= (crop_overscan_h_left + crop_overscan_h_right);
       height -= (crop_overscan_v_top + crop_overscan_v_bottom);
+<<<<<<< HEAD
       pitch  -= (crop_overscan_h_left + crop_overscan_h_right) * sizeof(uint16_t);
+=======
+      pitch  -= (crop_overscan_h_left + crop_overscan_h_right) * sizeof(uint32_t);
+>>>>>>> 56b5f47 (Update Makefile.libretro)
       gfx    += (crop_overscan_v_top * 256) + crop_overscan_h_left;
 
       if (use_raw_palette)
@@ -3432,10 +3440,10 @@ bool retro_load_game(const struct retro_game_info *info)
             sizeof(content_path));
    }
 
-#ifdef FRONTEND_SUPPORTS_RGB565
-   rgb565 = RETRO_PIXEL_FORMAT_RGB565;
+#ifdef FRONTEND_SUPPORTS_RGB888
+   rgb565 = RETRO_PIXEL_FORMAT_XRGB8888;
    if(environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &rgb565))
-      log_cb.log(RETRO_LOG_INFO, "Frontend supports RGB565 - will use that instead of XRGB1555.\n");
+      log_cb.log(RETRO_LOG_INFO, "Frontend supports RGB888 - will use that instead of XRGB1555.\n");
 #endif
 
    /* initialize some of the default variables */
@@ -3466,7 +3474,7 @@ bool retro_load_game(const struct retro_game_info *info)
 #define FB_WIDTH NES_WIDTH
 #define FB_HEIGHT NES_HEIGHT
 #endif
-   fceu_video_out = (uint16_t*)malloc(FB_WIDTH * FB_HEIGHT * sizeof(uint16_t));
+   fceu_video_out = (uint32_t*)malloc(FB_WIDTH * FB_HEIGHT * sizeof(uint32_t));
 #endif
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &system_dir) && system_dir)
