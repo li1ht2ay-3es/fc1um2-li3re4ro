@@ -144,6 +144,7 @@ struct retro_core_option_v2_definition option_defs[] = {
          { "8:7 PAR", NULL },
          { "4:3",     NULL },
          { "PP",      "Pixel Perfect" },
+         { "Custom",  "PAR Ratio" },
          { NULL, NULL },
       },
       "8:7 PAR",
