@@ -47,6 +47,7 @@ runs:
         }
 
 
+        merge aspect-ratio
         merge audio-rate
         merge color-depth
         merge mingw-flags
