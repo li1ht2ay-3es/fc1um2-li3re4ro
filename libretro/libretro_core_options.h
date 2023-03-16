@@ -148,6 +148,7 @@ struct retro_core_option_v2_definition option_defs[] = {
       },
       "8:7 PAR",
    },
+#include "aspect_ratio.inc"
 #ifdef PSP /* overscan options */
    {
       "fceumm_overscan",
