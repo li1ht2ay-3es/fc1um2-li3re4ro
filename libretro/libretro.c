@@ -1249,7 +1249,7 @@ static float get_aspect_ratio(unsigned width, unsigned height)
   else if (aspect_ratio_par == 3)
     return NES_PP;
   else if (aspect_ratio_par == 4)
-    return width * ((7.0 + aspect_ratio_custom / 100.0) / 7.0) / height;
+    return width * ((7.0 + aspect_ratio_ntsc / 100.0) / 7.0) / height;
   else
     return NES_8_7_PAR;
 }
