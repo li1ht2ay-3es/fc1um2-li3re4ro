@@ -1,6 +1,3 @@
-description: build libretro
-
-
 inputs:
   token:
     description: github token
@@ -50,6 +47,7 @@ runs:
         merge aspect-ratio
         merge audio-rate
         merge color-depth
+        merge default-palette
         merge mingw-flags
         merge volume-level
 
