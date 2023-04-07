@@ -48,6 +48,7 @@ runs:
         merge audio-rate
         merge color-depth
         merge mingw-flags
+        merge sprite-limit
         merge volume-level
 
         # merge libretro-options
