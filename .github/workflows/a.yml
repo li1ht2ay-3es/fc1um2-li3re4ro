@@ -45,12 +45,12 @@ jobs:
           echo "";
         }
 
-        merge aspect-ratio
-        merge audio-rate
-        merge color-depth
-        merge mingw-flags
-        merge sprite-limit
-        merge volume-level
+        # merge aspect-ratio
+        # merge audio-rate
+        # merge color-depth
+        # merge mingw-flags
+        # merge sprite-limit
+        # merge volume-level
 
 
 
