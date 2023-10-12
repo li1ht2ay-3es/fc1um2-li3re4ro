@@ -8,14 +8,75 @@ jobs:
   build_libretro:
     strategy:
       matrix:
-        arch: [x86, x64]
+        arch: [so64, x86, x64]
       fail-fast: false
 
 
     runs-on: ubuntu-latest
 
+
     steps:
-      - uses: li1ht2ay-3es/fc1um2-li3re4ro@build-libretro
-        with:
-          token: ${{ secrets.token }}
-          arch: ${{ matrix.arch }}
+
+    - uses: li1ht2ay-3es/gi1-ac2io3s@checkout-repo
+      with:
+        token: ${{ secrets.token }}
+        auto: true
+
+
+    - if: matrix.arch == 'x86' || matrix.arch == 'x64'
+      uses: li1ht2ay-3es/gi1-ac2io3s@mingw-install
+      with:
+        arch: ${{ matrix.arch }}
+
+
+    - uses: hendrikmuhs/ccache-action@main
+      with:
+        key: ${{ matrix.arch }}
+
+
+    - run: |
+        merge () {
+          echo "<<< ===  merging  $1  === >>>";
+          if [[ -z "$2" ]]; then
+            git merge origin/$1 || { git diff --diff-filter=U; exit 1; }
+          else
+            git merge origin/$1 || { git diff --diff-filter=U; git merge --abort; git merge -X $2 origin/$1; }
+          fi
+          echo "";
+        }
+
+        merge aspect-ratio
+        merge audio-rate
+        merge color-depth
+        merge mingw-flags
+        merge sprite-limit
+        merge volume-level
+
+
+
+    - if: matrix.arch == 'x86' || matrix.arch == 'x64'
+      working-directory: ${{ github.workspace }}
+      env:
+        CC: ccache ${{ env.MINGW_CC }}
+        CXX: ccache ${{ env.MINGW_CXX }}
+      run: |
+        make platform="win"
+
+
+
+    - if: matrix.arch == 'so64'
+      working-directory: ${{ github.workspace }}
+      env:
+        CC: ccache gcc
+        CXX: ccache g++
+      run: |
+        make platform="unix"
+
+
+
+    - uses: actions/upload-artifact@main
+      with:
+        name: fceumm_libretro_${{ inputs.arch }}
+        path: |
+          ${{ github.workspace }}/**.dll
+          ${{ github.workspace }}/**.so
