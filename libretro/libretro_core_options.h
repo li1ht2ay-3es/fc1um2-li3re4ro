@@ -653,8 +653,12 @@ struct retro_core_option_v2_definition option_defs[] = {
          { "200", "200%" }, \
          { NULL, NULL },
       },
+<<<<<<< HEAD
       "75",
 >>>>>>> 6e3a2a0 (Update libretro_core_options.h)
+=======
+      "150",
+>>>>>>> 3a1eeaa (Update libretro_core_options.h)
    },
    {
       "fceumm_apu_square_1",
