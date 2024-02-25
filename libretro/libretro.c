@@ -1796,10 +1796,19 @@ static void check_variables(bool startup) {
 
 	var.key = "fceumm_swapduty";
 
+<<<<<<< HEAD
 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
 		bool newval = (!strcmp(var.value, "enabled"));
 		FSettings.SwapDutyCycles = newval;
 	}
+=======
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      int val = (int)(atof(var.value) * 1.0);
+      sndvolume = val;
+      FSettings.SoundVolume = sndvolume;
+   }
+>>>>>>> 4c29a9a (Update libretro.c)
 
 	if ((stereo_filter_updated || (audio_video_updated == 2)) && !startup) {
 		stereo_filter_init();
