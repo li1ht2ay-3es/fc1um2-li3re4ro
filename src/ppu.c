@@ -1074,6 +1074,373 @@ static void CopySprites(uint8 *target) {
 	} while(n);
 }
 
+<<<<<<< HEAD
+=======
+static void RefreshSprites(void) {
+	int n;
+	SPRB *spr;
+
+	spork = 0;
+	if (!numsprites) return;
+
+	FCEU_dwmemset(sprlinebuf, 0x80808080, 256);
+	numsprites--;
+	spr = (SPRB*)SPRBUF + numsprites;
+
+	for (n = numsprites; n >= 0; n--, spr--) {
+		int x = spr->x;
+		uint8 *C;
+		uint8 *VB;
+		uint32 pixdata = ppulut1[spr->ca[0]] | ppulut2[spr->ca[1]];
+		uint8 J = spr->ca[0] | spr->ca[1];
+		uint8 atr = spr->atr;
+
+		if (J) {
+			if (n == 0 && SpriteBlurp && !(PPU_status & 0x40)) {
+				sphitx = x;
+				sphitdata = J;
+				if (atr & H_FLIP)
+					sphitdata = ((J << 7) & 0x80) |
+								((J << 5) & 0x40) |
+								((J << 3) & 0x20) |
+								((J << 1) & 0x10) |
+								((J >> 1) & 0x08) |
+								((J >> 3) & 0x04) |
+								((J >> 5) & 0x02) |
+								((J >> 7) & 0x01);
+			}
+
+			C = sprlinebuf + x;
+			VB = (PALRAM + 0x10) + ((atr & 3) << 2);
+
+			if (atr & SP_BACK) {
+				if (atr & H_FLIP) {
+					if (J & 0x80) C[7] = VB[pixdata & 3] | 0x40;
+					pixdata >>= 4;
+					if (J & 0x40) C[6] = VB[pixdata & 3] | 0x40;
+					pixdata >>= 4;
+					if (J & 0x20) C[5] = VB[pixdata & 3] | 0x40;
+					pixdata >>= 4;
+					if (J & 0x10) C[4] = VB[pixdata & 3] | 0x40;
+					pixdata >>= 4;
+					if (J & 0x08) C[3] = VB[pixdata & 3] | 0x40;
+					pixdata >>= 4;
+					if (J & 0x04) C[2] = VB[pixdata & 3] | 0x40;
+					pixdata >>= 4;
+					if (J & 0x02) C[1] = VB[pixdata & 3] | 0x40;
+					pixdata >>= 4;
+					if (J & 0x01) C[0] = VB[pixdata] | 0x40;
+				} else {
+					if (J & 0x80) C[0] = VB[pixdata & 3] | 0x40;
+					pixdata >>= 4;
+					if (J & 0x40) C[1] = VB[pixdata & 3] | 0x40;
+					pixdata >>= 4;
+					if (J & 0x20) C[2] = VB[pixdata & 3] | 0x40;
+					pixdata >>= 4;
+					if (J & 0x10) C[3] = VB[pixdata & 3] | 0x40;
+					pixdata >>= 4;
+					if (J & 0x08) C[4] = VB[pixdata & 3] | 0x40;
+					pixdata >>= 4;
+					if (J & 0x04) C[5] = VB[pixdata & 3] | 0x40;
+					pixdata >>= 4;
+					if (J & 0x02) C[6] = VB[pixdata & 3] | 0x40;
+					pixdata >>= 4;
+					if (J & 0x01) C[7] = VB[pixdata] | 0x40;
+				}
+			} else {
+				if (atr & H_FLIP) {
+					if (J & 0x80) C[7] = VB[pixdata & 3];
+					pixdata >>= 4;
+					if (J & 0x40) C[6] = VB[pixdata & 3];
+					pixdata >>= 4;
+					if (J & 0x20) C[5] = VB[pixdata & 3];
+					pixdata >>= 4;
+					if (J & 0x10) C[4] = VB[pixdata & 3];
+					pixdata >>= 4;
+					if (J & 0x08) C[3] = VB[pixdata & 3];
+					pixdata >>= 4;
+					if (J & 0x04) C[2] = VB[pixdata & 3];
+					pixdata >>= 4;
+					if (J & 0x02) C[1] = VB[pixdata & 3];
+					pixdata >>= 4;
+					if (J & 0x01) C[0] = VB[pixdata];
+				} else {
+					if (J & 0x80) C[0] = VB[pixdata & 3];
+					pixdata >>= 4;
+					if (J & 0x40) C[1] = VB[pixdata & 3];
+					pixdata >>= 4;
+					if (J & 0x20) C[2] = VB[pixdata & 3];
+					pixdata >>= 4;
+					if (J & 0x10) C[3] = VB[pixdata & 3];
+					pixdata >>= 4;
+					if (J & 0x08) C[4] = VB[pixdata & 3];
+					pixdata >>= 4;
+					if (J & 0x04) C[5] = VB[pixdata & 3];
+					pixdata >>= 4;
+					if (J & 0x02) C[6] = VB[pixdata & 3];
+					pixdata >>= 4;
+					if (J & 0x01) C[7] = VB[pixdata];
+				}
+			}
+		}
+	}
+	SpriteBlurp = 0;
+	spork = 1;
+}
+
+static void DoLine(void)
+{
+	int x, colour_emphasis;
+	uint8 *target = NULL;
+	uint8 *dtarget = NULL;
+
+	if (scanline >= 240 && scanline != totalscanlines)
+	{
+		X6502_Run(256 + 69);
+		scanline++;
+		X6502_Run(16);
+		return;
+	}
+
+	target = XBuf + ((scanline < 240 ? scanline : 240) << 8);
+	dtarget = XDBuf + ((scanline < 240 ? scanline : 240) << 8);
+
+	if (MMC5Hack && (ScreenON || SpriteON)) MMC5_hb(scanline);
+
+	X6502_Run(256);
+	EndRL();
+
+	if (RENDIS_SHOW_BACKGROUND) {/* User asked to not display background data. */
+		uint32 tem;
+		tem = PALRAM[0] | (PALRAM[0] << 8) | (PALRAM[0] << 16) | (PALRAM[0] << 24);
+		tem |= 0x40404040;
+		FCEU_dwmemset(target, tem, 256);
+	}
+
+	if (SpriteON)
+		CopySprites(target);
+
+	if (ScreenON || SpriteON) {	/* Yes, very el-cheapo. */
+		if (PPU[1] & 0x01) {
+			for (x = 63; x >= 0; x--)
+				*(uint32*)&target[x << 2] = (*(uint32*)&target[x << 2]) & 0x30303030;
+		}
+	}
+	if ((PPU[1] >> 5) == 0x7) {
+		for (x = 63; x >= 0; x--)
+			*(uint32*)&target[x << 2] = ((*(uint32*)&target[x << 2]) & 0x3f3f3f3f) | 0xc0c0c0c0;
+	} else if (PPU[1] & 0xE0)
+		for (x = 63; x >= 0; x--)
+			*(uint32*)&target[x << 2] = (*(uint32*)&target[x << 2]) | 0x40404040;
+	else
+		for (x = 63; x >= 0; x--)
+			*(uint32*)&target[x << 2] = ((*(uint32*)&target[x << 2]) & 0x3f3f3f3f) | 0x80808080;
+
+	/* write the actual colour emphasis */
+	colour_emphasis = ((PPU[1] >> 5) << 24) | ((PPU[1] >> 5) << 16) | ((PPU[1] >> 5) << 8) | ((PPU[1] >> 5) << 0);
+	for (x = 63; x >= 0; x--)
+		*(uint32*)&dtarget[x << 2] = colour_emphasis;
+
+    sphitx = 0x100;
+
+	if (ScreenON || SpriteON)
+		FetchSpriteData();
+
+	if (GameHBIRQHook && (ScreenON || SpriteON) && ((PPU[0] & 0x38) != 0x18)) {
+		X6502_Run(6);
+		if (ScreenON || SpriteON)
+			Fixit2();
+		X6502_Run(4);
+		GameHBIRQHook();
+		X6502_Run(85 - 16 - 10);
+	} else {
+		X6502_Run(6);	/* Tried 65, caused problems with Slalom(maybe others) */
+		if (ScreenON || SpriteON)
+			Fixit2();
+		X6502_Run(85 - 6 - 16);
+
+		/* A semi-hack for Star Trek: 25th Anniversary */
+		if (GameHBIRQHook && (ScreenON || SpriteON) && ((PPU[0] & 0x38) != 0x18))
+			GameHBIRQHook();
+	}
+
+	if (SpriteON)
+		RefreshSprites();
+	if (GameHBIRQHook2 && (ScreenON || SpriteON))
+		GameHBIRQHook2();
+	scanline++;
+	if (scanline < 240) {
+		ResetRL(XBuf + (scanline << 8));
+	}
+	X6502_Run(16);
+}
+
+void FCEUI_DisableSpriteLimitation(int a) {
+	maxsprites = a ? 64 : 8;
+}
+
+static void FetchSpriteData(void) {
+	int n;
+	uint8 P0 = PPU[0];
+<<<<<<< HEAD
+	SPR *spr = (SPR*)SPRAM;
+	uint8 H  = 8;
+	uint8 ns = 0;
+	uint8 sb = 0;
+	int vofs = (uint32)(P0 & 0x8 & (((P0 & 0x20) ^ 0x20) >> 2)) << 9;
+=======
+	uint8 identicalSpriteCount;
+	uint16 lastPosition;
+
+	spr = (SPR*)SPRAM;
+	H = 8;
+
+	ns = sb = 0;
+	identicalSpriteCount = 0;
+	lastPosition = 0xffff;
+
+	vofs = (uint32)(P0 & 0x8 & (((P0 & 0x20) ^ 0x20) >> 2)) << 9;
+>>>>>>> 9a6a74d (Update ppu.c)
+	H += (P0 & 0x20) >> 2;
+
+	if (!PPU_hook)
+		for (n = 63; n >= 0; n--, spr++) {
+			if ((uint32)(scanline - spr->y) >= H) continue;
+			if (ns < maxsprites) {
+				if (n == 63) sb = 1;
+
+				{
+					uint16 position = (spr->y << 8) | spr->x;
+					if (lastPosition != position) {
+						lastPosition = position;
+						identicalSpriteCount = 1;
+					} else {
+						identicalSpriteCount++;
+						if (identicalSpriteCount == 8) {
+							maxsprites = 8;
+						}
+					}
+				}
+
+				{
+					SPRB dst;
+					uint8 *C;
+					uint32 vadr;
+					int t = (int)scanline - (spr->y);
+
+					if (Sprite16)
+						vadr = ((spr->no & 1) << 12) + ((spr->no & 0xFE) << 4);
+					else
+						vadr = (spr->no << 4) + vofs;
+
+					if (spr->atr & V_FLIP) {
+						vadr += 7;
+						vadr -= t;
+						vadr += (P0 & 0x20) >> 1;
+						vadr -= t & 8;
+					} else {
+						vadr += t;
+						vadr += t & 8;
+					}
+
+					/* Fix this geniestage hack */
+					if (MMC5Hack && geniestage != 1)
+						C = MMC5SPRVRAMADR(vadr);
+					else
+						C = VRAMADR(vadr);
+
+					dst.ca[0] = C[0];
+					dst.ca[1] = C[8];
+					dst.x = spr->x;
+					dst.atr = spr->atr;
+
+					*(uint32*)&SPRBUF[ns << 2] = *(uint32*)&dst;
+				}
+
+				ns++;
+			} else {
+				PPU_status |= 0x20;
+				break;
+			}
+		}
+	else
+		for (n = 63; n >= 0; n--, spr++) {
+			if ((uint32)(scanline - spr->y) >= H) continue;
+
+			if (ns < maxsprites) {
+				if (n == 63) sb = 1;
+
+				{
+					uint16 position = (spr->y << 8) | spr->x;
+					if (lastPosition != position) {
+						lastPosition = position;
+						identicalSpriteCount = 1;
+					} else {
+						identicalSpriteCount++;
+						if (identicalSpriteCount == 8) {
+							maxsprites = 8;
+						}
+					}
+				}
+
+				{
+					SPRB dst;
+					uint8 *C;
+					uint32 vadr;
+					int t = (int)scanline - (spr->y);
+
+					if (Sprite16)
+						vadr = ((spr->no & 1) << 12) + ((spr->no & 0xFE) << 4);
+					else
+						vadr = (spr->no << 4) + vofs;
+
+					if (spr->atr & V_FLIP) {
+						vadr += 7;
+						vadr -= t;
+						vadr += (P0 & 0x20) >> 1;
+						vadr -= t & 8;
+					} else {
+						vadr += t;
+						vadr += t & 8;
+					}
+
+					if (MMC5Hack)
+						C = MMC5SPRVRAMADR(vadr);
+					else
+						C = VRAMADR(vadr);
+					dst.ca[0] = C[0];
+					if (ns < 8) {
+						PPU_hook(0x2000);
+						PPU_hook(vadr);
+					}
+					dst.ca[1] = C[8];
+					dst.x = spr->x;
+					dst.atr = spr->atr;
+
+
+					*(uint32*)&SPRBUF[ns << 2] = *(uint32*)&dst;
+				}
+
+				ns++;
+			} else {
+				PPU_status |= 0x20;
+				break;
+			}
+		}
+
+	/* Handle case when >8 sprites per scanline option is enabled. */
+	if (ns > 8) PPU_status |= 0x20;
+	else if (PPU_hook) {
+		for (n = 0; n < (8 - ns); n++) {
+			PPU_hook(0x2000);
+			PPU_hook(vofs);
+		}
+	}
+	numsprites = ns;
+	SpriteBlurp = sb;
+}
+
+>>>>>>> 5659b3f (Update ppu.c)
 void FCEUPPU_SetVideoSystem(int w) {
 	if (w) {
 		scanlines_per_frame = isDendy ? 262 : 312;
