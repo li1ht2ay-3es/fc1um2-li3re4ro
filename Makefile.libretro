@@ -298,7 +298,7 @@ else ifeq ($(platform), ngc)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).a
 	CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
 	AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
-	PLATFORM_DEFINES := -DGEKKO -DPLATFORM_SUPPORTS_RGB565
+	PLATFORM_DEFINES := -DGEKKO -DFRONTEND_SUPPORTS_RGB565
 	PLATFORM_DEFINES += -DHW_DOL -mrvl -mcpu=750 -meabi -mhard-float
 	PLATFORM_DEFINES += -U__INT32_TYPE__ -U __UINT32_TYPE__ -D__INT32_TYPE__=int
 	ENDIANNESS_DEFINES += -DMSB_FIRST
@@ -310,7 +310,7 @@ else ifeq ($(platform), wii)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).a
 	CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
 	AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
-	PLATFORM_DEFINES := -DGEKKO -DPLATFORM_SUPPORTS_ARGB888
+	PLATFORM_DEFINES := -DGEKKO -DFRONTEND_SUPPORTS_ARGB888
 	PLATFORM_DEFINES += -DHW_RVL -mrvl -mcpu=750 -meabi -mhard-float
 	PLATFORM_DEFINES += -U__INT32_TYPE__ -U __UINT32_TYPE__ -D__INT32_TYPE__=int
 	ENDIANNESS_DEFINES += -DMSB_FIRST
@@ -323,7 +323,7 @@ else ifeq ($(platform), wiiu)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).a
 	CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
 	AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
-	PLATFORM_DEFINES := -DGEKKO -DPLATFORM_SUPPORTS_ARGB888
+	PLATFORM_DEFINES := -DGEKKO -DFRONTEND_SUPPORTS_ARGB888
 	PLATFORM_DEFINES += -DHW_RVL -mcpu=750 -meabi -mhard-float
 	PLATFORM_DEFINES += -U__INT32_TYPE__ -U __UINT32_TYPE__ -D__INT32_TYPE__=int
 	ENDIANNESS_DEFINES += -DMSB_FIRST
@@ -345,7 +345,7 @@ else ifeq ($(platform), libnx)
     EXT=a
     TARGET := $(TARGET_NAME)_libretro_$(platform).$(EXT)
     DEFINES := -DSWITCH=1 -U__linux__ -U__linux -DRARCH_INTERNAL
-    PLATFORM_DEFINES := -DPLATFORM_SUPPORTS_ARGB888
+    PLATFORM_DEFINES := -DFRONTEND_SUPPORTS_ARGB888
     CFLAGS	:= $(DEFINES) -g -O2 \
 	-fPIE -I$(LIBNX)/include/ -ffunction-sections -fdata-sections -ftls-model=local-exec -Wl,--allow-multiple-definition -specs=$(LIBNX)/switch.specs
     CFLAGS      += $(INCDIRS)
@@ -365,7 +365,7 @@ else ifeq ($(platform), classic_armv7_a7)
 	TARGET := $(TARGET_NAME)_libretro.so
 	fpic := -fPIC
 	SHARED := -shared -Wl,--version-script=$(LINK_T) -Wl,-no-undefined
-	PLATFORM_DEFINES := -DPLATFORM_SUPPORTS_ARGB888
+	PLATFORM_DEFINES := -DFRONTEND_SUPPORTS_ARGB888
 	CFLAGS += -Ofast \
 	-flto=4 -fwhole-program -fuse-linker-plugin \
 	-fdata-sections -ffunction-sections -Wl,--gc-sections \
@@ -397,7 +397,7 @@ else ifeq ($(platform), classic_armv8_a35)
 	TARGET := $(TARGET_NAME)_libretro.so
 	fpic := -fPIC
 	SHARED := -shared -Wl,--version-script=$(LINK_T) -Wl,-no-undefined
-	PLATFORM_DEFINES := -DPLATFORM_SUPPORTS_ARGB888
+	PLATFORM_DEFINES := -DFRONTEND_SUPPORTS_ARGB888
 	CFLAGS += -Ofast \
 	-flto=4 -fwhole-program -fuse-linker-plugin \
 	-fdata-sections -ffunction-sections -Wl,--gc-sections \
@@ -422,7 +422,7 @@ else ifneq (,$(findstring armv,$(platform)))
 	TARGET := $(TARGET_NAME)_libretro.so
 	SHARED := -shared -Wl,--version-script=$(LINK_T) -Wl,-no-undefined
 	fpic := -fPIC
-	PLATFORM_DEFINES := -DPLATFORM_SUPPORTS_ARGB888
+	PLATFORM_DEFINES := -DFRONTEND_SUPPORTS_ARGB888
 	ifneq (,$(findstring cortexa5,$(platform)))
 		PLATFORM_DEFINES += -marm -mcpu=cortex-a5
 	else ifneq (,$(findstring cortexa8,$(platform)))
@@ -444,7 +444,7 @@ else ifneq (,$(findstring armv,$(platform)))
 # emscripten
 else ifeq ($(platform), emscripten)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).bc
-	PLATFORM_DEFINES := -DPLATFORM_SUPPORTS_ARGB888
+	PLATFORM_DEFINES := -DFRONTEND_SUPPORTS_ARGB888
 	STATIC_LINKING=1
 	EXTERNAL_ZLIB=1
 
@@ -456,7 +456,7 @@ else ifeq ($(platform), gcw0)
 	AR = /opt/gcw0-toolchain/usr/bin/mipsel-linux-ar
 	fpic := -fPIC
 	SHARED := -shared -Wl,--version-script=$(LINK_T) -Wl,-no-undefined
-	PLATFORM_DEFINES := -DPLATFORM_SUPPORTS_RGB565
+	PLATFORM_DEFINES := -DFRONTEND_SUPPORTS_RGB565
 	PLATFORM_DEFINES += -ffast-math -march=mips32 -mtune=mips32r2 -mhard-float -fomit-frame-pointer
 	EXTERNAL_ZLIB = 1
 
@@ -468,7 +468,7 @@ else ifeq ($(platform), retrofw)
 	AR = /opt/retrofw-toolchain/usr/bin/mipsel-linux-ar
 	fpic := -fPIC
 	SHARED := -shared -Wl,--version-script=$(LINK_T) -Wl,-no-undefined
-	PLATFORM_DEFINES := -DPLATFORM_SUPPORTS_RGB565
+	PLATFORM_DEFINES := -DFRONTEND_SUPPORTS_RGB565
 	PLATFORM_DEFINES += -ffast-math -march=mips32 -mtune=mips32 -mhard-float -fomit-frame-pointer
 	EXTERNAL_ZLIB = 1
 
@@ -480,7 +480,7 @@ else ifeq ($(platform), miyoo)
 	AR = /opt/miyoo/usr/bin/arm-linux-ar
 	fpic := -fPIC
 	SHARED := -shared -Wl,--version-script=$(LINK_T) -Wl,-no-undefined
-	PLATFORM_DEFINES := -DPLATFORM_SUPPORTS_RGB565
+	PLATFORM_DEFINES := -DFRONTEND_SUPPORTS_RGB565
 	PLATFORM_DEFINES += -fomit-frame-pointer -ffast-math -mcpu=arm926ej-s
 	EXTERNAL_ZLIB = 1
 
@@ -502,7 +502,7 @@ else ifneq (,$(findstring windows_msvc2017,$(platform)))
 		LIBS += WindowsApp.lib
 	endif
 
-	PLATFORM_DEFINES := -DPLATFORM_SUPPORTS_ARGB888
+	PLATFORM_DEFINES := -DFRONTEND_SUPPORTS_ARGB888
 	CFLAGS += $(MSVC2017CompileFlags)
 	CXXFLAGS += $(MSVC2017CompileFlags)
 
@@ -579,7 +579,7 @@ else ifeq ($(platform), windows_msvc2010_x64)
 	CC  = cl.exe
 	CXX = cl.exe
 
-	PLATFORM_DEFINES := -DPLATFORM_SUPPORTS_ARGB888
+	PLATFORM_DEFINES := -DFRONTEND_SUPPORTS_ARGB888
 PATH := $(shell IFS=$$'\n'; cygpath "$(VS100COMNTOOLS)../../VC/bin/amd64"):$(PATH)
 PATH := $(PATH):$(shell IFS=$$'\n'; cygpath "$(VS100COMNTOOLS)../IDE")
 LIB := $(shell IFS=$$'\n'; cygpath "$(VS100COMNTOOLS)../../VC/lib/amd64")
@@ -603,7 +603,7 @@ else ifeq ($(platform), windows_msvc2010_x86)
 	CC  = cl.exe
 	CXX = cl.exe
 
-	PLATFORM_DEFINES := -DPLATFORM_SUPPORTS_ARGB888
+	PLATFORM_DEFINES := -DFRONTEND_SUPPORTS_ARGB888
 PATH := $(shell IFS=$$'\n'; cygpath "$(VS100COMNTOOLS)../../VC/bin"):$(PATH)
 PATH := $(PATH):$(shell IFS=$$'\n'; cygpath "$(VS100COMNTOOLS)../IDE")
 LIB := $(shell IFS=$$'\n'; cygpath -w "$(VS100COMNTOOLS)../../VC/lib")
@@ -629,7 +629,7 @@ CC  = CL.exe
 CXX  = CL.exe
 LD   = lib.exe
 
-	PLATFORM_DEFINES := -DPLATFORM_SUPPORTS_ARGB888
+	PLATFORM_DEFINES := -DFRONTEND_SUPPORTS_ARGB888
 export INCLUDE := $(XDK)\xbox\include
 export LIB := $(XDK)\xbox\lib
 PATH := $(call unixcygpath,$(XDK)/xbox/bin/vc71):$(PATH)
@@ -645,7 +645,7 @@ CC  = cl.exe
 CXX  = cl.exe
 LD   = lib.exe
 
-	PLATFORM_DEFINES := -DPLATFORM_SUPPORTS_ARGB888
+	PLATFORM_DEFINES := -DFRONTEND_SUPPORTS_ARGB888
 export INCLUDE := $(XEDK)/include/xbox
 export LIB := $(XEDK)/lib/xbox
 PATH := $(call unixcygpath,$(XEDK)/bin/win32):$(PATH)
@@ -660,7 +660,7 @@ else ifeq ($(platform), windows_msvc2008_x86)
 	CC  = cl.exe
 	CXX = cl.exe
 
-	PLATFORM_DEFINES := -DPLATFORM_SUPPORTS_ARGB888
+	PLATFORM_DEFINES := -DFRONTEND_SUPPORTS_ARGB888
 PATH := $(shell IFS=$$'\n'; cygpath "$(VS90COMNTOOLS)../../VC/bin"):$(PATH)
 PATH := $(PATH):$(shell IFS=$$'\n'; cygpath "$(VS90COMNTOOLS)../IDE")
 INCLUDE := $(shell IFS=$$'\n'; cygpath "$(VS90COMNTOOLS)../../VC/include")
@@ -680,7 +680,7 @@ else ifeq ($(platform), windows_msvc2005_x86)
 	CC  = cl.exe
 	CXX = cl.exe
 
-	PLATFORM_DEFINES := -DPLATFORM_SUPPORTS_ARGB888
+	PLATFORM_DEFINES := -DFRONTEND_SUPPORTS_ARGB888
 PATH := $(shell IFS=$$'\n'; cygpath "$(VS80COMNTOOLS)../../VC/bin"):$(PATH)
 PATH := $(PATH):$(shell IFS=$$'\n'; cygpath "$(VS80COMNTOOLS)../IDE")
 INCLUDE := $(shell IFS=$$'\n'; cygpath "$(VS80COMNTOOLS)../../VC/include")
@@ -707,7 +707,7 @@ else ifeq ($(platform), windows_msvc2003_x86)
 	CC  = cl.exe
 	CXX = cl.exe
 
-	PLATFORM_DEFINES := -DPLATFORM_SUPPORTS_ARGB888
+	PLATFORM_DEFINES := -DFRONTEND_SUPPORTS_ARGB888
 PATH := $(shell IFS=$$'\n'; cygpath "$(VS71COMNTOOLS)../../Vc7/bin"):$(PATH)
 PATH := $(PATH):$(shell IFS=$$'\n'; cygpath "$(VS71COMNTOOLS)../IDE")
 INCLUDE := $(shell IFS=$$'\n'; cygpath "$(VS71COMNTOOLS)../../Vc7/include")
@@ -726,7 +726,7 @@ CFLAGS += -D_CRT_SECURE_NO_DEPRECATE
 else
 	TARGET := $(TARGET_NAME)_libretro.dll
 	CC ?= gcc
-	PLATFORM_DEFINES := -DPLATFORM_SUPPORTS_ARGB888
+	PLATFORM_DEFINES := -DFRONTEND_SUPPORTS_ARGB888
 	SHARED := -shared -static-libgcc -static-libstdc++ -s -Wl,--version-script=$(LINK_T)
 endif
 
