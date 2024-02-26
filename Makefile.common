@@ -15,7 +15,19 @@ ifneq (,$(findstring msvc2003,$(platform)))
 	INCFLAGS += -I$(LIBRETRO_COMM_DIR)/include/compat/msvc
 endif
 
+<<<<<<< HEAD
 COREDEFINES = -D__LIBRETRO__ -DPATH_MAX=1024
+=======
+COREDEFINES = \
+	-D__LIBRETRO__ \
+	-DPATH_MAX=1024 \
+<<<<<<< HEAD
+	-DFRONTEND_SUPPORTS_RGB565
+=======
+	-DFCEU_VERSION_NUMERIC=9813 \
+	-DFRONTEND_SUPPORTS_RGB888
+>>>>>>> 62ed4ff (Update Makefile.libretro)
+>>>>>>> 10935e4 (Update libretro.c)
 
 FCEU_SRC_DIRS := \
 	$(SOURCE_DIR)/mappers \

@@ -150,13 +150,21 @@ static bool opt_showAdvSystemOptions = true;
 #if defined(PSP) || defined(PS2)
 static __attribute__((aligned(16))) uint16 retro_palette[1024];
 #else
+<<<<<<< HEAD
 static Bpp_t retro_palette[1024];
+=======
+static uint32_t retro_palette[256];
+>>>>>>> 8639455 (Update libretro.c)
 #endif
 #if defined(PSP) || defined(PS2)
 /* not used because of hw buffers? */
 /* static uint8* fceu_video_out; */
 #else
+<<<<<<< HEAD
 static Bpp_t *fceu_video_out;
+=======
+static uint32_t* fceu_video_out;
+>>>>>>> 8639455 (Update libretro.c)
 #endif
 
 /* Some timing-related variables. */
@@ -178,6 +186,7 @@ const char *GetKeyboard(void) {
 	return "";
 }
 
+<<<<<<< HEAD
 void FCEUD_SetPalette(int index, uint8 r, uint8 g, uint8 b) {
 	unsigned index_to_write = index;
 #if defined(PS2)
@@ -188,6 +197,64 @@ void FCEUD_SetPalette(int index, uint8 r, uint8 g, uint8 b) {
 	} else if ((modi >= 16 && modi < 24) || (modi >= 48 && modi < 56)) {
 		index_to_write -= 8;
 	}
+=======
+#define BUILD_PIXEL_RGB565(R,G,B) (((int) ((R)&0x1f) << RED_SHIFT) | ((int) ((G)&0x3f) << GREEN_SHIFT) | ((int) ((B)&0x1f) << BLUE_SHIFT))
+
+#if defined (PSP)
+#define RED_SHIFT 0
+#define GREEN_SHIFT 5
+#define BLUE_SHIFT 11
+#define RED_EXPAND 3
+#define GREEN_EXPAND 2
+#define BLUE_EXPAND 3
+#elif defined (FRONTEND_SUPPORTS_ABGR1555)
+#define RED_SHIFT 0
+#define GREEN_SHIFT 5
+#define BLUE_SHIFT 10
+#define RED_EXPAND 3
+#define GREEN_EXPAND 3
+#define BLUE_EXPAND 3
+#define RED_MASK 0x1F
+#define GREEN_MASK 0x3E0
+#define BLUE_MASK 0x7C00
+#elif defined (FRONTEND_SUPPORTS_RGB565)
+#define RED_SHIFT 11
+#define GREEN_SHIFT 5
+#define BLUE_SHIFT 0
+#define RED_EXPAND 3
+#define GREEN_EXPAND 2
+#define BLUE_EXPAND 3
+#define RED_MASK 0xF800
+#define GREEN_MASK 0x7e0
+#define BLUE_MASK 0x1f
+#else
+#define RED_SHIFT 10
+#define GREEN_SHIFT 5
+#define BLUE_SHIFT 0
+#define RED_EXPAND 3
+#define GREEN_EXPAND 3
+#define BLUE_EXPAND 3
+#endif
+
+void FCEUD_SetPalette(uint8_t index, uint8_t r, uint8_t g, uint8_t b)
+{
+   unsigned char index_to_write = index;
+#if defined(RENDER_GSKIT_PS2)
+   /* Index correction for PS2 GS */
+   int modi = index & 63;
+   if ((modi >= 8 && modi < 16) || (modi >= 40 && modi < 48)) {
+      index_to_write += 8;
+   } else if ((modi >= 16 && modi < 24) || (modi >= 48 && modi < 56)) {
+         index_to_write -= 8;
+   }
+#endif
+
+#ifdef FRONTEND_SUPPORTS_RGB888
+   retro_palette[index_to_write] = (r << 16) | (g << 8) | (b << 0);
+#else
+   retro_palette[index_to_write] =
+      ((r >> RED_EXPAND) << RED_SHIFT) | ((g >> GREEN_EXPAND) << GREEN_SHIFT) | ((b >> BLUE_EXPAND) << BLUE_SHIFT);
+>>>>>>> 8639455 (Update libretro.c)
 #endif
     retro_palette[index_to_write] = BUILD_PIXEL(r >> RED_EXPAND, g >> GREEN_EXPAND, b >> BLUE_EXPAND);
 }
@@ -1892,7 +1959,122 @@ static void retro_run_blit_psp(uint8 *gfx) {
 
 	sceGuFinish();
 
+<<<<<<< HEAD
 	video_cb(texture_vram_p, width, height, 256);
+=======
+      if (mouse_Lbutton)
+         mousedata[2] |= 0x1;
+      if (mouse_Rbutton)
+         mousedata[2] |= 0x2;
+   }
+<<<<<<< HEAD
+   else if (variant != RETRO_DEVICE_ARKANOID && zappermode == RetroPointer) {
+=======
+   else if (zappermode == RetroPointer) {
+>>>>>>> 56b5f47 (Update Makefile.libretro)
+      int offset_x = (crop_overscan_h_left * 0x120) - 1;
+      int offset_y = (crop_overscan_v_top * 0x133) + 1;
+
+      int _x = input_cb(port, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_X);
+      int _y = input_cb(port, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_Y);
+
+      if (_x == 0 && _y == 0)
+      {
+         mousedata[0] = 0;
+      }
+      else
+      {
+         mousedata[0] = (_x + (0x7FFF + offset_x)) * max_width  / ((0x7FFF + offset_x) * 2);
+         mousedata[1] = (_y + (0x7FFF + offset_y)) * max_height  / ((0x7FFF + offset_y) * 2);
+      }
+
+      if (input_cb(port, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_PRESSED))
+         mousedata[2] |= 0x1;
+   }
+   else if (variant == RETRO_DEVICE_ARKANOID && (arkanoidmode == RetroArkanoidAbsMouse || arkanoidmode == RetroArkanoidPointer)) {
+      int offset_x = (crop_overscan_h_left * 0x120) - 1;
+
+      int _x = input_cb(port, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_X);
+      int _y = input_cb(port, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_Y);
+
+      if (_x != 0 || _y != 0)
+      {
+         int32 raw = (_x + (0x7FFF + offset_x)) * max_width  / ((0x7FFF + offset_x) * 2);
+         if (arkanoidmode == RetroArkanoidAbsMouse) {
+             /* remap so full screen movement ends up within the encoder range 0-240
+                game board: 176 wide
+                paddle: 32
+                range of movement: 176-32 = 144
+                left edge: 16
+                right edge: 64
+             
+                increase movement by 10 to allow edges to be reached in case of problems
+	     */
+             raw = (raw - 128) * 140 / 128 + 128;
+             if (raw < 0)
+                 raw = 0;
+             else if (raw > 255)
+                 raw = 255;
+              
+             mousedata[0] = raw * 240 / 255;
+         }
+         else {
+             /* remap so full board movement ends up within the encoder range 0-240 */
+             if (mousedata[0] < 16+(32/2))
+                 mousedata[0] = 0;
+             else
+                 mousedata[0] -= 16+(32/2);
+             if (mousedata[0] > 144)
+                 mousedata[0] = 144;
+             mousedata[0] = raw * 240 / 144;
+         }
+      }
+      
+
+      if (input_cb(port, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_PRESSED))
+         mousedata[2] |= 0x1;
+   }
+   else if (variant == RETRO_DEVICE_ARKANOID && arkanoidmode == RetroArkanoidStelladaptor) {
+      int x = input_cb(port, RETRO_DEVICE_ANALOG, 0, RETRO_DEVICE_ID_ANALOG_X);
+      mousedata[0] = (x+32768)*240/65535;
+      if (input_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A) || input_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B))
+         mousedata[2] |= 0x1;
+   }
+   else  if (zappermode == RetroCLightgun) /* Crosshair lightgun device */
+   {
+      int offset_x = (crop_overscan_h_left * 0x120) - 1;
+      int offset_y = (crop_overscan_v_top * 0x133) + 1;
+      int offscreen;
+      int offscreen_shot;
+      int trigger;
+
+      offscreen = input_cb( port, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_IS_OFFSCREEN );
+      offscreen_shot = input_cb( port, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_RELOAD );
+      trigger = input_cb( port, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_TRIGGER );
+
+      if ( offscreen || offscreen_shot )
+      {
+         mousedata[0] = 0;
+         mousedata[1] = 0;
+      }
+      else
+      {
+         int _x = input_cb( port, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_X );
+         int _y = input_cb( port, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_SCREEN_Y );
+
+         mousedata[0] = (_x + (0x7FFF + offset_x)) * max_width  / ((0x7FFF + offset_x) * 2);
+         mousedata[1] = (_y + (0x7FFF + offset_y)) * max_height  / ((0x7FFF + offset_y) * 2);
+      }
+
+      if ( trigger || offscreen_shot )
+         mousedata[2] |= 0x1;
+   }
+   else /* Sequential targets lightgun device integration */
+   {
+      mousedata[2] = input_cb( port, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_TRIGGER );
+      mousedata[3] = input_cb( port, RETRO_DEVICE_LIGHTGUN, 0, RETRO_DEVICE_ID_LIGHTGUN_AUX_A );
+   }
+>>>>>>> 8639455 (Update libretro.c)
 }
 #elif defined(PS2)
 
@@ -1929,6 +2111,85 @@ static void retro_run_blit_ps2(uint8 *gfx) {
 
 	video_cb(buf, width, height, pitch);
 }
+<<<<<<< HEAD
+=======
+
+static void retro_run_blit(uint8_t *gfx)
+{
+   unsigned x, y;
+#ifdef PSP
+   static unsigned int __attribute__((aligned(16))) d_list[32];
+   void* texture_vram_p = NULL;
+#endif
+   unsigned incr   = 0;
+   unsigned width  = 256;
+   unsigned height = 240;
+   unsigned pitch  = width * sizeof(uint32_t);
+
+#ifdef PSP
+   if (crop_overscan)
+   {
+      width  -= 16;
+      height -= 16;
+   }
+   texture_vram_p = (void*) (0x44200000 - (256 * 256)); /* max VRAM address - frame size */
+
+   sceKernelDcacheWritebackRange(retro_palette,256 * 2);
+   sceKernelDcacheWritebackRange(XBuf, 256*240 );
+
+   sceGuStart(GU_DIRECT, d_list);
+
+   /* sceGuCopyImage doesnt seem to work correctly with GU_PSM_T8
+    * so we use GU_PSM_4444 ( 2 Bytes per pixel ) instead
+    * with half the values for pitch / width / x offset
+    */
+   if (crop_overscan)
+      sceGuCopyImage(GU_PSM_4444, 4, 4, 120, 224, 128, XBuf, 0, 0, 128, texture_vram_p);
+   else
+      sceGuCopyImage(GU_PSM_4444, 0, 0, 128, 240, 128, XBuf, 0, 0, 128, texture_vram_p);
+
+   sceGuTexSync();
+   sceGuTexImage(0, 256, 256, 256, texture_vram_p);
+   sceGuTexMode(GU_PSM_T8, 0, 0, GU_FALSE);
+   sceGuTexFunc(GU_TFX_REPLACE, GU_TCC_RGB);
+   sceGuDisable(GU_BLEND);
+   sceGuClutMode(GU_PSM_5650, 0, 0xFF, 0);
+   sceGuClutLoad(32, retro_palette);
+
+   sceGuFinish();
+
+   video_cb(texture_vram_p, width, height, 256);
+#elif defined(RENDER_GSKIT_PS2)
+   uint32_t *buf = (uint32_t *)RETRO_HW_FRAME_BUFFER_VALID;
+
+   if (!ps2) {
+      if (!environ_cb(RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE, (void **)&ps2) || !ps2) {
+         FCEU_printf(" Failed to get HW rendering interface!\n");
+         return;
+      }
+
+      if (ps2->interface_version != RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION) {
+         FCEU_printf(" HW render interface mismatch, expected %u, got %u!\n",
+                  RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION, ps2->interface_version);
+         return;
+      }
+
+      ps2->coreTexture->Width = width;
+      ps2->coreTexture->Height = height;
+      ps2->coreTexture->PSM = GS_PSM_T8;
+      ps2->coreTexture->ClutPSM = GS_PSM_CT16;
+      ps2->coreTexture->Filter = GS_FILTER_LINEAR;
+      ps2->padding = (struct retro_hw_ps2_insets){ (float) crop_overscan_v_top,
+                                                   (float) crop_overscan_h_left,
+                                                   (float) crop_overscan_v_bottom,
+                                                   (float) crop_overscan_h_right };
+   }
+
+   ps2->coreTexture->Clut = (u32*)retro_palette;
+   ps2->coreTexture->Mem = (u32*)gfx;
+
+   video_cb(buf, width, height, pitch);
+>>>>>>> 8639455 (Update libretro.c)
 #else
 #if defined(HAVE_NTSC_FILTER)
 static void retro_run_blit_ntsc(uint8 *gfx, uint8 *emp) {
@@ -1951,6 +2212,19 @@ static void retro_run_blit_ntsc(uint8 *gfx, uint8 *emp) {
 		NTSC_WIDTH * sizeof(Bpp_t));
 }
 #endif /* HAVE_NTSC_FILTER */
+<<<<<<< HEAD
+=======
+   {
+      incr   += (crop_overscan_h_left + crop_overscan_h_right);
+      width  -= (crop_overscan_h_left + crop_overscan_h_right);
+      height -= (crop_overscan_v_top + crop_overscan_v_bottom);
+<<<<<<< HEAD
+      pitch  -= (crop_overscan_h_left + crop_overscan_h_right) * sizeof(uint16_t);
+=======
+      pitch  -= (crop_overscan_h_left + crop_overscan_h_right) * sizeof(uint32_t);
+>>>>>>> 56b5f47 (Update Makefile.libretro)
+      gfx    += (crop_overscan_v_top * 256) + crop_overscan_h_left;
+>>>>>>> 8639455 (Update libretro.c)
 
 static INLINE int get_pixel_color(const uint8 *in, const uint8 *inD) {
 	uint8 pixel = *in, deemp = *inD;
@@ -1981,6 +2255,580 @@ static void retro_run_blit(uint8 *gfx, uint8 *emp) {
 
 	video_cb(fceu_video_out, width, height, width * sizeof(Bpp_t));
 }
+<<<<<<< HEAD
+=======
+
+size_t retro_serialize_size(void)
+{
+   if (serialize_size == 0)
+   {
+      /* Something arbitrarily big.*/
+      uint8_t *buffer = (uint8_t*)malloc(1000000);
+      memstream_set_buffer(buffer, 1000000);
+
+      FCEUSS_Save_Mem();
+      serialize_size = memstream_get_last_size();
+      free(buffer);
+   }
+
+   return serialize_size;
+}
+
+bool retro_serialize(void *data, size_t size)
+{
+   /* Cannot save state while Game Genie
+    * screen is open */
+   if (geniestage == 1)
+      return false;
+
+   if (size != retro_serialize_size())
+      return false;
+
+   memstream_set_buffer((uint8_t*)data, size);
+   FCEUSS_Save_Mem();
+   return true;
+}
+
+bool retro_unserialize(const void * data, size_t size)
+{
+   /* Cannot load state while Game Genie
+    * screen is open */
+   if (geniestage == 1)
+      return false;
+
+   if (size != retro_serialize_size())
+      return false;
+
+   memstream_set_buffer((uint8_t*)data, size);
+   FCEUSS_Load_Mem();
+   return true;
+}
+
+static int checkGG(char c)
+{
+   static const char lets[16] = { 'A', 'P', 'Z', 'L', 'G', 'I', 'T', 'Y', 'E', 'O', 'X', 'U', 'K', 'S', 'V', 'N' };
+   int x;
+
+   for (x = 0; x < 16; x++)
+      if (lets[x] == toupper(c))
+         return 1;
+   return 0;
+}
+
+static int GGisvalid(const char *code)
+{
+   size_t len = strlen(code);
+   uint32 i;
+
+   if (len != 6 && len != 8)
+      return 0;
+
+   for (i = 0; i < len; i++)
+      if (!checkGG(code[i]))
+         return 0;
+   return 1;
+}
+
+void retro_cheat_reset(void)
+{
+   FCEU_ResetCheats();
+}
+
+void retro_cheat_set(unsigned index, bool enabled, const char *code)
+{
+   char name[256];
+   char temp[256];
+   char *codepart;
+   uint16 a;
+   uint8  v;
+   int    c;
+   int    type = 1;
+
+   if (!code)
+      return;
+
+   sprintf(name, "N/A");
+   strcpy(temp, code);
+   codepart = strtok(temp, "+,;._ ");
+
+   while (codepart)
+   {
+      size_t codepart_len = strlen(codepart);
+      if ((codepart_len == 7) && (codepart[4]==':'))
+      {
+         /* raw code in xxxx:xx format */
+         codepart[4] = '\0';
+         a = strtoul(codepart, NULL, 16);
+         v = strtoul(codepart + 5, NULL, 16);
+         c = -1;
+         /* Zero-page addressing modes don't go through the normal read/write handlers in FCEU, so
+          * we must do the old hacky method of RAM cheats. */
+         if (a < 0x0100) type = 0;
+         FCEUI_AddCheat(name, a, v, c, type);
+      }
+      else if ((codepart_len == 10) && (codepart[4] == '?') && (codepart[7] == ':'))
+      {
+         /* raw code in xxxx?xx:xx */
+         codepart[4] = '\0';
+         codepart[7] = '\0';
+         a = strtoul(codepart, NULL, 16);
+         v = strtoul(codepart + 8, NULL, 16);
+         c = strtoul(codepart + 5, NULL, 16);
+         /* Zero-page addressing modes don't go through the normal read/write handlers in FCEU, so
+          * we must do the old hacky method of RAM cheats. */
+         if (a < 0x0100) type = 0;
+         FCEUI_AddCheat(name, a, v, c, type);
+      }
+      else if (GGisvalid(codepart) && FCEUI_DecodeGG(codepart, &a, &v, &c))
+      {
+         FCEUI_AddCheat(name, a, v, c, type);
+      }
+      else if (FCEUI_DecodePAR(codepart, &a, &v, &c, &type))
+      {
+         FCEUI_AddCheat(name, a, v, c, type);
+      }
+      else
+         log_cb.log(RETRO_LOG_DEBUG, "Invalid or unknown code: '%s'\n", codepart);
+      codepart = strtok(NULL,"+,;._ ");
+   }
+}
+
+typedef struct cartridge_db
+{
+   char title[256];
+   uint32_t crc;
+} cartridge_db_t;
+
+static const struct cartridge_db fourscore_db_list[] =
+{
+   {
+      "Bomberman II (USA)",
+      0x1ebb5b42
+   },
+#if 0
+   {
+      "Championship Bowling (USA)",
+      0xeac38105
+   },
+#endif
+   {
+      "Chris Evert & Ivan Lendl in Top Players' Tennis (USA)",
+      0xf99e37eb
+   },
+#if 0
+   {
+      "Crash 'n' the Boys - Street Challenge (USA)",
+      0xc7f0c457
+   },
+#endif
+   {
+      "Four Players' Tennis (Europe)",
+      0x48b8ee58
+   },
+   {
+      "Danny Sullivan's Indy Heat (Europe)",
+      0x27ca0679,
+   },
+   {
+      "Gauntlet II (Europe)",
+      0x79f688bc
+   },
+   {
+      "Gauntlet II (USA)",
+      0x1b71ccdb
+   },
+   {
+      "Greg Norman's Golf Power (USA)",
+      0x1352f1b9
+   },
+   {
+      "Harlem Globetrotters (USA)",
+      0x2e6ee98d
+   },
+   {
+      "Ivan 'Ironman' Stewart's Super Off Road (Europe)",
+      0x05104517
+   },
+   {
+      "Ivan 'Ironman' Stewart's Super Off Road (USA)",
+      0x4b041b6b
+   },
+   {
+      "Kings of the Beach - Professional Beach Volleyball (USA)",
+      0xf54b34bd
+   },
+   {
+      "Magic Johnson's Fast Break (USA)",
+      0xc6c2edb5
+   },
+   {
+      "M.U.L.E. (USA)",
+      0x0939852f
+   },
+   {
+      "Micro Mages",
+      0x4e6b9078
+   },
+   {
+      "Monster Truck Rally (USA)",
+      0x2f698c4d
+   },
+   {
+      "NES Play Action Football (USA)",
+      0xb9b4d9e0
+   },
+   {
+      "Nightmare on Elm Street, A (USA)",
+      0xda2cb59a
+   },
+   {
+      "Nintendo World Cup (Europe)",
+      0x8da6667d
+   },
+   {
+      "Nintendo World Cup (Europe) (Rev A)",
+      0x7c16f819
+   },
+   {
+      "Nintendo World Cup (Europe) (Rev B)",
+      0x7f08d0d9
+   },
+   {
+      "Nintendo World Cup (USA)",
+      0xa22657fa
+   },
+   {
+      "R.C. Pro-Am II (Europe)",
+      0x308da987
+   },
+   {
+      "R.C. Pro-Am II (USA)",
+      0x9edd2159
+   },
+   {
+      "Rackets & Rivals (Europe)",
+      0x8fa6e92c
+   },
+   {
+      "Roundball - 2-on-2 Challenge (Europe)",
+      0xad0394f0
+   },
+   {
+      "Roundball - 2-on-2 Challenge (USA)",
+      0x6e4dcfd2
+   },
+   {
+      "Spot - The Video Game (Japan)",
+      0x0abdd5ca
+   },
+   {
+      "Spot - The Video Game (USA)",
+      0xcfae9dfa
+   },
+   {
+      "Smash T.V. (Europe)",
+      0x0b8f8128
+   },
+   {
+      "Smash T.V. (USA)",
+      0x6ee94d32
+   },
+   {
+      "Super Jeopardy! (USA)",
+      0xcf4487a2
+   },
+   {
+      "Super Spike V'Ball (Europe)",
+      0xc05a63b2
+   },
+   {
+      "Super Spike V'Ball (USA)",
+      0xe840fd21
+   },
+   {
+      "Super Spike V'Ball + Nintendo World Cup (USA)",
+      0x407d6ffd
+   },
+   {
+      "Swords and Serpents (Europe)",
+      0xd153caf6
+   },
+   {
+      "Swords and Serpents (France)",
+      0x46135141
+   },
+   {
+      "Swords and Serpents (USA)",
+      0x3417ec46
+   },
+   {
+      "Battle City (Japan) (4 Players Hack) http://www.romhacking.net/hacks/2142/",
+      0x69977c9e
+   },
+   {
+      "Bomberman 3 (Homebrew) http://tempect.de/senil/games.html",
+      0x2da5ece0
+   },
+   {
+      "K.Y.F.F. (Homebrew) http://slydogstudios.org/index.php/k-y-f-f/",
+      0x90d2e9f0
+   },
+   {
+      "Super PakPak (Homebrew) http://wiki.nesdev.com/w/index.php/Super_PakPak",
+      0x1394ded0
+   },
+   {
+      "Super Mario Bros. + Tetris + Nintendo World Cup (Europe)",
+      0x73298c87
+   },
+   {
+      "Super Mario Bros. + Tetris + Nintendo World Cup (Europe) (Rev A)",
+      0xf46ef39a
+   }
+};
+
+static const struct cartridge_db famicom_4p_db_list[] =
+{
+   {
+      "Bakutoushi Patton-Kun (Japan) (FDS)",
+      0xc39b3bb2
+   },
+   {
+      "Bomber Man II (Japan)",
+      0x0c401790
+   },
+   {
+      "Championship Bowling (Japan)",
+      0x9992f445
+   },
+   {
+      "Downtown - Nekketsu Koushinkyoku - Soreyuke Daiundoukai (Japan)",
+      0x3e470fe0
+   },
+   {
+      "Ike Ike! Nekketsu Hockey-bu - Subette Koronde Dairantou (Japan)",
+      0x4f032933
+   },
+   {
+      "Kunio-kun no Nekketsu Soccer League (Japan)",
+      0x4b5177e9
+   },
+   {
+      "Moero TwinBee - Cinnamon Hakase o Sukue! (Japan)",
+      0x9f03b11f
+   },
+   {
+      "Moero TwinBee - Cinnamon Hakase wo Sukue! (Japan) (FDS)",
+      0x13205221
+   },
+   {
+      "Nekketsu Kakutou Densetsu (Japan)",
+      0x37e24797
+   },
+   {
+      "Nekketsu Koukou Dodgeball-bu (Japan)",
+      0x62c67984
+   },
+   {
+      "Nekketsu! Street Basket - Ganbare Dunk Heroes (Japan)",
+      0x88062d9a
+   },
+   {
+      "Super Dodge Ball (USA) (3-4p with Game Genie code GEUOLZZA)",
+      0x689971f9
+   },
+   {
+      "Super Dodge Ball (USA) (patched) http://www.romhacking.net/hacks/71/",
+      0x4ff17864
+   },
+   {
+      "U.S. Championship V'Ball (Japan)",
+      0x213cb3fb
+   },
+   {
+      "U.S. Championship V'Ball (Japan) (Beta)",
+      0xd7077d96
+   },
+   {
+      "Wit's (Japan)",
+      0xb1b16b8a
+   }
+};
+
+bool retro_load_game(const struct retro_game_info *info)
+{
+   unsigned i, j;
+   const char *system_dir = NULL;
+   size_t fourscore_len = sizeof(fourscore_db_list)   / sizeof(fourscore_db_list[0]);
+   size_t famicom_4p_len = sizeof(famicom_4p_db_list) / sizeof(famicom_4p_db_list[0]);
+   enum retro_pixel_format rgb565;
+
+   struct retro_input_descriptor desc[] = {
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,   "D-Pad Left" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,     "D-Pad Up" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,   "D-Pad Down" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT,  "D-Pad Right" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B,      "B" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,      "A" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3,     "A+B" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START,  "Start" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R2,     "(VSSystem) Insert Coin" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L,      "(FDS) Disk Side Change" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R,      "(FDS) Insert/Eject Disk" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X,      "Turbo A" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y,      "Turbo B" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3,     "Turbo A+B" },
+
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,   "D-Pad Left" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,     "D-Pad Up" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,   "D-Pad Down" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT,  "D-Pad Right" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B,      "B" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,      "A" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3,     "A+B" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START,  "Start" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X,      "Turbo A" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y,      "Turbo B" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3,     "Turbo A+B" },
+
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,   "D-Pad Left" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,     "D-Pad Up" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,   "D-Pad Down" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT,  "D-Pad Right" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B,      "B" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,      "A" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3,     "A+B" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START,  "Start" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X,      "Turbo A" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y,      "Turbo B" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3,     "Turbo A+B" },
+
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,   "D-Pad Left" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,     "D-Pad Up" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,   "D-Pad Down" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT,  "D-Pad Right" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B,      "B" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,      "A" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3,     "A+B" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START,  "Start" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X,      "Turbo A" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y,      "Turbo B" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3,     "Turbo A+B" },
+
+      { 0 },
+   };
+
+   struct retro_input_descriptor desc_ps[] = { /* ps: palette switching */
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,   "D-Pad Left" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,     "D-Pad Up" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,   "D-Pad Down" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT,  "D-Pad Right" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B,      "B" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,      "A" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3,     "A+B" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START,  "Start" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L2,     "Switch Palette (+ Left/Right)" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R2,     "(VSSystem) Insert Coin" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L,      "(FDS) Disk Side Change" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R,      "(FDS) Insert/Eject Disk" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X,      "Turbo A" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y,      "Turbo B" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3,     "Turbo A+B" },
+
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,   "D-Pad Left" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,     "D-Pad Up" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,   "D-Pad Down" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT,  "D-Pad Right" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B,      "B" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,      "A" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3,     "A+B" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START,  "Start" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X,      "Turbo A" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y,      "Turbo B" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3,     "Turbo A+B" },
+
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,   "D-Pad Left" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,     "D-Pad Up" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,   "D-Pad Down" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT,  "D-Pad Right" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B,      "B" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,      "A" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3,     "A+B" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START,  "Start" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X,      "Turbo A" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y,      "Turbo B" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3,     "Turbo A+B" },
+
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,   "D-Pad Left" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,     "D-Pad Up" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,   "D-Pad Down" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT,  "D-Pad Right" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_B,      "B" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,      "A" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3,     "A+B" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT, "Select" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START,  "Start" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_X,      "Turbo A" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_Y,      "Turbo B" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3,     "Turbo A+B" },
+
+      { 0 },
+   };
+
+   size_t desc_base = 64;
+   struct retro_memory_descriptor descs[64 + 4];
+   struct retro_memory_map        mmaps;
+
+   struct retro_game_info_ext *info_ext = NULL;
+   const uint8_t *content_data          = NULL;
+   size_t content_size                  = 0;
+   char content_path[2048]              = {0};
+
+   /* Attempt to fetch extended game info */
+   if (environ_cb(RETRO_ENVIRONMENT_GET_GAME_INFO_EXT, &info_ext) && info_ext)
+   {
+      content_data = (const uint8_t *)info_ext->data;
+      content_size = info_ext->size;
+
+      if (info_ext->file_in_archive)
+      {
+         /* We don't have a 'physical' file in this
+          * case, but the core still needs a filename
+          * in order to detect the region of iNES v1.0
+          * ROMs. We therefore fake it, using the content
+          * directory, canonical content name, and content
+          * file extension */
+         snprintf(content_path, sizeof(content_path), "%s%c%s.%s",
+               info_ext->dir,
+               PATH_DEFAULT_SLASH_C(),
+               info_ext->name,
+               info_ext->ext);
+      }
+      else
+         strlcpy(content_path, info_ext->full_path,
+               sizeof(content_path));
+   }
+   else
+   {
+      if (!info || string_is_empty(info->path))
+         return false;
+
+      strlcpy(content_path, info->path,
+            sizeof(content_path));
+   }
+
+#ifdef FRONTEND_SUPPORTS_RGB888
+   rgb565 = RETRO_PIXEL_FORMAT_XRGB8888;
+   if(environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &rgb565))
+      log_cb.log(RETRO_LOG_INFO, "Frontend supports RGB888 - will use that instead of XRGB1555.\n");
+>>>>>>> 8639455 (Update libretro.c)
 #endif
 
 static bool checkGG(char c) {
@@ -2296,6 +3144,7 @@ static void init_blit_buffer(void) {
 #define FB_WIDTH  NES_WIDTH
 #define FB_HEIGHT NES_HEIGHT
 #endif
+<<<<<<< HEAD
 	fceu_video_out = (Bpp_t *)FCEU_amalloc(FB_WIDTH * FB_HEIGHT * sizeof(Bpp_t));
 #endif /* !PS2 */
 }
@@ -2402,6 +3251,9 @@ bool retro_load_game(const struct retro_game_info *info) {
 	rgb565 = RETRO_PIXEL_FORMAT_XRGB8888;
 	if (environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &rgb565))
 		log_cb.log(RETRO_LOG_INFO, " Frontend supports xRGB888 - will use that instead of XRGB1555.\n");
+=======
+   fceu_video_out = (uint32_t*)malloc(FB_WIDTH * FB_HEIGHT * sizeof(uint32_t));
+>>>>>>> 8639455 (Update libretro.c)
 #endif
 
 	if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &system_dir) && system_dir) {
