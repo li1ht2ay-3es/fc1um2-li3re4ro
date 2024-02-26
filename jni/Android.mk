@@ -7,7 +7,7 @@ HAVE_NTSC := 1
 
 include $(LOCAL_PATH)/../Makefile.common
 
-COREFLAGS := $(COREDEFINES) $(INCFLAGS)
+COREFLAGS := $(COREDEFINES) $(INCFLAGS) -DFRONTEND_SUPPORTS_ARGB888
 
 GIT_VERSION := " $(shell git rev-parse --short HEAD || echo unknown)"
 ifneq ($(GIT_VERSION)," unknown")
