@@ -1772,12 +1772,10 @@ static DECLFR(MAFRAM) {
 
 	/* Mapper #90 - JY */
 	if (mapper == 13) {
-		if ((A == 0x5800)) {
+		if (A == 0x5800)
 			return (mul1 * mul2) & 0xFF;
-		}
-		if ((A == 0x5801)) {
+		if (A == 0x5801)
 			return ((mul1 * mul2) >> 8) & 0xFF;
-		}
 	}
 
 	/* MMC5 */
